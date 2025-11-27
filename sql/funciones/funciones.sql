@@ -14,7 +14,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Registrar una venta (versión 1). Retorna el monto$ de la venta
+-- Registrar una venta (versión 2). Retorna el monto$ de la venta. Aplica descuento del 
+-- 10% si la compra es muy grande (>= 5 unidades).
 CREATE OR REPLACE FUNCTION sc_cafeteria.registrar_venta(
     p_id_cliente   integer,
     p_id_producto  integer,
@@ -44,17 +45,26 @@ BEGIN
             v_stock_disponible, p_cantidad;
     END IF;
 
-    -- 3) Insertar la venta
+    -- 3) Insertar la nueva venta
     INSERT INTO sc_cafeteria.ventas (id_cliente, id_producto, cantidad)
     VALUES (p_id_cliente, p_id_producto, p_cantidad)
     RETURNING id_venta INTO v_id_venta;
 
-    -- (Aquí se ejecuta el trigger trg_descontar_stock)
+    -- (Se ejecuta el trigger que descuenta stock)
 
-    -- 4) Calcular el total usando la función ya existente
+    -- 4) Calcular total sin descuento
     SELECT sc_cafeteria.calcular_total_venta(v_id_venta)
     INTO v_total;
+
+    -- 5) Aplicar descuento si la compra es "grande" (≥ 5 unidades)
+    IF p_cantidad >= 5 THEN
+        v_total := v_total * 0.9;  -- 10% de descuento
+    END IF;
 
     RETURN v_total;
 END;
 $$;
+
+
+
+

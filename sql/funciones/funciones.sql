@@ -14,7 +14,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Registrar una venta (versión 2). Retorna el monto$ de la venta. Aplica descuento del 
+-- Registrar una venta (version 2). Retorna el monto$ de la venta. Aplica descuento del 
 -- 10% si la compra es muy grande (>= 5 unidades).
 CREATE OR REPLACE FUNCTION sc_cafeteria.registrar_venta(
     p_id_cliente   integer,
